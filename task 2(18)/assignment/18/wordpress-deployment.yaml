@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: wordpress
+  template:
+    metadata:
+      labels:
+        app: wordpress
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - wordpress
+              topologyKey: "kubernetes.io/hostname"
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+      containers:
+        - name: wordpress
+          image: wordpress:4.8-apache
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "64Mi"
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /readme.html
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /readme.html
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+  strategy:
+    type: Recreate

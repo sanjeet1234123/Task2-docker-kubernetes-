@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: box0
+spec:
+  containers:
+  - name: liveness
+    image: registry.k8s.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - sleep 30; touch /tmp/debug; sleep 30; rm -f /tmp/debug; 
+    readinessProbe:
+      exec:
+        command:
+          - cat
+          - /tmp/debug
+      initialDelaySeconds: 5
+      periodSeconds: 5

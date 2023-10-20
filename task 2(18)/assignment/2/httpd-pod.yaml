@@ -1,0 +1,12 @@
+apiVersion: v1 
+kind: Pod
+metadata:
+  name: httpd
+  namespace: secops
+  labels:
+    app: httpd
+spec:
+  
+  containers:
+    - name: httpd-container
+      image: httpd:alpine

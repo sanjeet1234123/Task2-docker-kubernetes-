@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:13
+    container_name: postgresdb
+    environment:
+      POSTGRES_DB: notejam
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes: 
+      - dbVolume:/var/lib/postgresql/data
+
+  web:
+    image: sanj
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DB_ENGINE: 'django.db.backends.postgresql'
+      DB_NAME: 'notejam'
+      DB_USER: 'postgres'
+      DB_PASSWORD: 'postgres'
+      DB_HOST: 'postgresdb'
+      DB_PORT: '5432'
+  
+volumes:
+    dbVolume:

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: box0
+spec:
+  containers:
+    - name: busybox-container
+      image: busybox
+      command: ["sh", "-c", "while true; do if [ ! -e /tmp/debug ]; then sleep 5; else sleep 999999; fi; done"]

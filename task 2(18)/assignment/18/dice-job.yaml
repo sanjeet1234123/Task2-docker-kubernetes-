@@ -1,0 +1,12 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dice-roll-job
+spec:
+  completions: 1
+  template:
+    spec:
+      containers:
+        - name: dice-container
+          image: kodekloud/throw-dice
+      restartPolicy: OnFailure

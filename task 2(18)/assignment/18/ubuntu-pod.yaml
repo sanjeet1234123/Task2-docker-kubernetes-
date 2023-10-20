@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu03
+spec:
+  containers:
+    - name: ubuntu-container
+      image: ubuntu
+      command: ["sh", "-c", "date -s '01JAN2020 10:00:00'"]
+      securityContext:
+        capabilities:
+          add: ["SYS_TIME"]

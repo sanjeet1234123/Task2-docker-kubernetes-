@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        name: db
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_DB
+              value: notejam
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: POSTGRES_USER
+              value: postgres
+          image: postgres:13
+          name: postgresdb
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: db-volume
+      restartPolicy: Always
+      volumes:
+        - name: db-volume
+          persistentVolumeClaim:
+            claimName: db-volume-claim
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-service
+spec:
+  selector:
+    name: db  # Match the labels of the "db" Pods
+  ports:
+    - name: db-port
+      port: 5432  # The port your database is running on (adjust if needed)
+      targetPort: 5432  # The port your database container is listening on

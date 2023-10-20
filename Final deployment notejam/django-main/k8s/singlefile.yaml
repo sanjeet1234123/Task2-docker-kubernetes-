@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        name: db
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_DB
+              value: notejam
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: POSTGRES_USER
+              value: postgres
+          image: postgres:13
+          name: postgresdb
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: db-volume
+      restartPolicy: Always
+      volumes:
+        - name: db-volume
+          persistentVolumeClaim:
+            claimName: db-volume-claim
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-service
+spec:
+  selector:
+    name: db  
+  ports:
+    - name: db-port
+      port: 5432  
+      targetPort: 5432  
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: web
+  name: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: web
+  template:
+    metadata:
+      labels:
+        name: web
+    spec:
+      containers:
+        - name: web  
+          image: sanjeetjha/sanj-notejam1
+          env:
+            - name: DB_ENGINE
+              value: django.db.backends.postgresql
+            - name: DB_HOST
+              value: db-service
+            - name: DB_NAME
+              value: notejam
+            - name: DB_PASSWORD
+              value: postgres
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: postgres
+          ports:
+            - containerPort: 8000
+          imagePullPolicy: Always
+
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: web
+  name: web
+spec:
+  ports:
+    - name: "8000"
+      port: 8000
+      targetPort: 8000
+  selector:
+    name: web
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-volume-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 800Mi
+
+
+---
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  labels:
+    name: web-service
+  name: web-service
+spec:
+  type: NodePort
+  ports:
+    - name: "http"
+      protocol: TCP
+      port: 8000  
+      targetPort: 8000 
+  selector:
+    name: web
+
+
